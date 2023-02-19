@@ -22,6 +22,7 @@ type AppConfig struct {
 	Secret    string           `json:"secret"`
 	Cockroach common.Cockroach `json:"cockroach"`
 	Mongo     common.Mongo     `json:"mongo"`
+	Pulsar    common.Pulsar    `json:"pulsar"`
 }
 
 // Load config file from given path

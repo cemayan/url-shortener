@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type CockroackDBHandler interface {
+type CockroackDBManager interface {
 	New() *gorm.DB
 }
 
@@ -65,6 +65,6 @@ func (d DBService) New() *gorm.DB {
 	return db
 }
 
-func NewCockroachDbHandler(configs *common.Cockroach, _log *log.Entry) CockroackDBHandler {
+func NewCockroachDbManager(configs *common.Cockroach, _log *log.Entry) CockroackDBManager {
 	return &DBService{configs: configs, _log: _log}
 }

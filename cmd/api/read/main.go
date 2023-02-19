@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/cemayan/url-shortener/config/api"
-	"github.com/cemayan/url-shortener/handlers/db"
 	"github.com/cemayan/url-shortener/internal/api/read/adapter/database"
+	"github.com/cemayan/url-shortener/managers/db"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
@@ -36,7 +36,7 @@ func init() {
 		return
 	}
 
-	dbHandler := db.NewCockroachDbHandler(&configs.Cockroach, _log.WithFields(logrus.Fields{"service": "database"}))
+	dbHandler := db.NewCockroachDbManager(&configs.Cockroach, _log.WithFields(logrus.Fields{"service": "database"}))
 	_db := dbHandler.New()
 	database.DB = _db
 	//util.MigrateDB(_db, _log.WithFields(logrus.Fields{"service": "database"}))

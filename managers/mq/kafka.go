@@ -1,4 +1,4 @@
-package kafka
+package mq
 
 import (
 	"github.com/cemayan/url-shortener/common"
@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type KafkaHandler interface {
+type KafkaManager interface {
 	GetKafkaWriter(addr string, topic string) *kafka.Writer
 	GetKafkaReader(addr string, topic string) *kafka.Reader
 }
@@ -39,6 +39,6 @@ func (k KafkaSvc) GetKafkaReader(addr string, topic string) *kafka.Reader {
 	})
 }
 
-func NewKafkaHandler(kafkaConfigs common.Kafka, log *log.Entry) KafkaHandler {
+func NewKafkaManager(kafkaConfigs common.Kafka, log *log.Entry) KafkaManager {
 	return &KafkaSvc{kafkaConfigs: kafkaConfigs, log: log}
 }

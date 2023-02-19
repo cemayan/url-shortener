@@ -1,4 +1,4 @@
-package kafka
+package mq
 
 import (
 	"github.com/apache/pulsar-client-go/pulsar"
@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type PulsarHandler interface {
+type PulsarManager interface {
 	GetPulsarProducer(producerOptions pulsar.ProducerOptions) pulsar.Producer
 	GetPulsarConsumer(consumerOptions pulsar.ConsumerOptions) pulsar.Consumer
 }
@@ -35,6 +35,6 @@ func (p PulsarSvc) GetPulsarConsumer(consumerOptions pulsar.ConsumerOptions) pul
 	return consumer
 }
 
-func NewPulsarHandler(pulsarClient pulsar.Client, pulsarConfig common.Pulsar, log *log.Entry) PulsarHandler {
+func NewPulsarManager(pulsarClient pulsar.Client, pulsarConfig common.Pulsar, log *log.Entry) PulsarManager {
 	return &PulsarSvc{pulsarClient: pulsarClient, pulsarConfig: pulsarConfig, log: log}
 }

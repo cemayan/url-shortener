@@ -6,5 +6,7 @@ cockroach:
 mongo:
   DbName: eseventstore
   url: mongodb://localhost:27017
+pulsar:
+  url: pulsar://localhost:6650
 secret: secret
   
