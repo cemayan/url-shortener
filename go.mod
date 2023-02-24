@@ -4,11 +4,15 @@ go 1.20
 
 require (
 	github.com/apache/pulsar-client-go v0.9.0
+	github.com/fluent/fluent-logger-golang v1.9.0
 	github.com/gofiber/fiber/v2 v2.42.0
+	github.com/gofiber/jwt/v2 v2.2.7
+	github.com/google/uuid v1.3.0
 	github.com/segmentio/kafka-go v0.4.38
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
 	go.mongodb.org/mongo-driver v1.11.2
+	google.golang.org/protobuf v1.28.1
 	gorm.io/driver/postgres v1.4.8
 	gorm.io/gorm v1.24.5
 )
@@ -21,6 +25,7 @@ require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/ardielle/ardielle-go v1.5.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
@@ -28,9 +33,9 @@ require (
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -83,7 +88,6 @@ require (
 	golang.org/x/term v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -2,11 +2,12 @@ package model
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type EventStore struct {
+type Events struct {
 	ID            primitive.ObjectID `bson:"_id"`
 	EventData     primitive.M        `bson:"eventData" json:"eventData"`
-	EventTime     int64              `bson:"eventTime" json:"eventTime"`
+	EventDate     int64              `bson:"eventDate" json:"eventDate"`
 	EventName     string             `bson:"eventName" json:"eventName"`
 	AggregateType string             `bson:"aggregateType" json:"aggregateType"`
-	AggregateID   string             `bson:"aggregateId" json:"aggregateId"`
+	AggregateId   string             `bson:"aggregateId" json:"aggregateId"`
+	UserId        string             `bson:"userId" json:"userId"`
 }

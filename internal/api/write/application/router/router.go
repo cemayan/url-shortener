@@ -2,12 +2,14 @@ package router
 
 import (
 	"github.com/apache/pulsar-client-go/pulsar"
+	pulsar_handler "github.com/cemayan/url-shortener/common/adapters/pulsar"
+	"github.com/cemayan/url-shortener/common/ports/output"
 	"github.com/cemayan/url-shortener/config/api"
 	"github.com/cemayan/url-shortener/internal/api/write/adapter/mongodb"
-	pulsar_handler "github.com/cemayan/url-shortener/internal/api/write/adapter/pulsar"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/port/input"
-	"github.com/cemayan/url-shortener/internal/api/write/domain/port/output"
+	mongo_output "github.com/cemayan/url-shortener/internal/api/write/domain/port/output"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/service"
+	"github.com/cemayan/url-shortener/managers/db"
 	"github.com/cemayan/url-shortener/managers/mq"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -23,8 +25,11 @@ func SetupRoutes(app *fiber.App, configs *api.AppConfig, _log *log.Entry) {
 	apiGroup := app.Group("/api", logger.New())
 	v1Group := apiGroup.Group("/v1")
 
-	var mongoPort output.MongoPort
-	mongoPort = mongodb.NewApiRepo(nil, configs, _log)
+	var mongoManager db.MongodbManager
+	mongoManager = db.NewMongodbManager(configs.Mongo, _log)
+
+	var mongoPort mongo_output.MongoPort
+	mongoPort = mongodb.NewApiRepo(mongoManager.New(), configs, _log)
 
 	client, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL:               configs.Pulsar.Url,
@@ -39,7 +44,7 @@ func SetupRoutes(app *fiber.App, configs *api.AppConfig, _log *log.Entry) {
 	pulsarManager = mq.NewPulsarManager(client, configs.Pulsar, _log)
 
 	var pulsarPort output.PulsarPort
-	pulsarPort = pulsar_handler.NewPulsarHandler(pulsarManager, configs, _log)
+	pulsarPort = pulsar_handler.NewPulsarHandler(pulsarManager, configs.Pulsar, _log)
 
 	var apiUseCase input.ApiUseCase
 	apiUseCase = service.NewApiService(mongoPort, pulsarPort, configs, _log)

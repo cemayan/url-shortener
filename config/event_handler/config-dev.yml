@@ -1,10 +1,13 @@
 cockroach:
-  Host: localhost
-  Name: us_metadata
-  Port: 26257
-  User: root
+  host: localhost
+  name: us_metadata
+  port: 26257
+  user: root
 mongo:
-  DbName: eseventstore
+  dbName: eseventstore
   url: mongodb://localhost:27017
+pulsar:
+  url: pulsar://localhost:6650
+  topic: events
 secret: secret
 

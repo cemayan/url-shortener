@@ -6,6 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var producerInstance *pulsar.Producer
+
 type PulsarManager interface {
 	GetPulsarProducer(producerOptions pulsar.ProducerOptions) pulsar.Producer
 	GetPulsarConsumer(consumerOptions pulsar.ConsumerOptions) pulsar.Consumer
@@ -18,13 +20,17 @@ type PulsarSvc struct {
 }
 
 func (p PulsarSvc) GetPulsarProducer(producerOptions pulsar.ProducerOptions) pulsar.Producer {
-	producer, err := p.pulsarClient.CreateProducer(producerOptions)
 
-	if err != nil {
-		p.log.Fatal(err)
+	if producerInstance == nil {
+		producer, err := p.pulsarClient.CreateProducer(producerOptions)
+
+		if err != nil {
+			p.log.Fatal(err)
+		}
+
+		producerInstance = &producer
 	}
-
-	return producer
+	return *producerInstance
 }
 
 func (p PulsarSvc) GetPulsarConsumer(consumerOptions pulsar.ConsumerOptions) pulsar.Consumer {

@@ -15,9 +15,9 @@ type ApiRepoSvc struct {
 	log         *log.Entry
 }
 
-func (a ApiRepoSvc) CreateUserUrl(userUrl model.UserUrl) error {
-	collection := a.mongoClient.Database(a.configs.Mongo.DbName).Collection("userUrls")
-	_, err := collection.InsertOne(database.MongoDBContext, &userUrl)
+func (a ApiRepoSvc) CreateEvent(event model.Events) error {
+	collection := a.mongoClient.Database(a.configs.Mongo.DbName).Collection("events")
+	_, err := collection.InsertOne(database.MongoDBContext, &event)
 	if err != nil {
 		a.log.WithFields(log.Fields{"method": "SaveRecord"}).Errorf("An errror occurred %v", err.Error())
 		return err

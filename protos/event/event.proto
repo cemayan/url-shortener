@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package protos;
+option go_package = "protos/event";
+
+message Event {
+  string  aggregate_id = 1;
+  string aggregate_type = 2;
+  bytes event_data = 3;
+  int64 event_date = 4;
+  string event_name = 5;
+  string user_id = 6;
+}
