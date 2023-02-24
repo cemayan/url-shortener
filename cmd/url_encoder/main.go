@@ -7,24 +7,24 @@ import (
 	"github.com/cemayan/url-shortener/common"
 	pulsar_handler "github.com/cemayan/url-shortener/common/adapters/pulsar"
 	"github.com/cemayan/url-shortener/common/ports/output"
-	"github.com/cemayan/url-shortener/config/event_handler"
-	"github.com/cemayan/url-shortener/internal/event_handler/adapter/cockroach"
-	"github.com/cemayan/url-shortener/internal/event_handler/adapter/database"
-	"github.com/cemayan/url-shortener/internal/event_handler/domain/model"
-	cockroack_output "github.com/cemayan/url-shortener/internal/event_handler/domain/port/output"
-	"github.com/cemayan/url-shortener/internal/event_handler/helper"
+	"github.com/cemayan/url-shortener/config/url_encoder"
+	"github.com/cemayan/url-shortener/internal/api/write/adapter/mongodb"
+	"github.com/cemayan/url-shortener/internal/api/write/domain/model"
 	"github.com/cemayan/url-shortener/managers/db"
 	"github.com/cemayan/url-shortener/managers/hook"
 	"github.com/cemayan/url-shortener/managers/mq"
+	"github.com/cemayan/url-shortener/util"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"math/rand"
 	"os"
 	"time"
 )
 
 var _log *logrus.Logger
-var configs *event_handler.AppConfig
+var configs *url_encoder.AppConfig
 var v *viper.Viper
 
 func init() {
@@ -41,7 +41,7 @@ func init() {
 	_log.Out = os.Stdout
 
 	v = viper.New()
-	_configs := event_handler.NewConfig(v)
+	_configs := url_encoder.NewConfig(v)
 
 	env := os.Getenv("env")
 	appConfig, err := _configs.GetConfig(env)
@@ -50,17 +50,17 @@ func init() {
 		return
 	}
 
-	dbHandler := db.NewCockroachDbManager(&configs.Cockroach, _log.WithFields(logrus.Fields{"service": "database"}))
-	_db := dbHandler.New()
-	database.DB = _db
-
-	helper.MigrateDB(_db, _log.WithFields(logrus.Fields{"service": "database"}))
-
 	fluentdHook := hook.NewFluentdHook()
 	_log.Hooks.Add(fluentdHook)
 }
 
 func main() {
+
+	var mongoManager db.MongodbManager
+	mongoManager = db.NewMongodbManager(configs.Mongo, _log.WithFields(logrus.Fields{"service": "mongo-db-manager"}))
+
+	var mongoPort output.MongoPort
+	mongoPort = mongodb.NewApiRepo(mongoManager.New(), configs.Mongo, _log.WithFields(logrus.Fields{"service": "mongo-db-manager"}))
 
 	client, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL:               configs.Pulsar.Url,
@@ -93,10 +93,9 @@ func main() {
 			_log.WithFields(logrus.Fields{"method": "GetSchemaValue", "message": err.Error(), "data": string(msg.Payload())}).Log(logrus.ErrorLevel)
 		}
 
-		if event.EventName == common.UrlCreated {
+		if event.EventName == common.UrlEncoded {
 
-			var cockroachPort cockroack_output.CockroachPort
-			cockroachPort = cockroach.NewUserUrlRepo(database.DB, _log.WithFields(logrus.Fields{"service": "cockroach-repo"}))
+			metadata := util.GetEventMetadata()
 
 			var eventDetail common.EventDataDetail
 
@@ -105,14 +104,44 @@ func main() {
 				return
 			}
 
-			_, err = cockroachPort.CreateUserUrl(&model.UserUrl{
-				UserId:   event.UserId,
-				ShortUrl: eventDetail.ShortUrl,
-				LongUrl:  eventDetail.LongUrl,
+			eventDetail.ShortUrl = "shortttt"
+
+			err = mongoPort.CreateEvent(model.Events{
+				ID: primitive.NewObjectID(),
+				EventData: bson.M{
+					"shortUrl": "shortttt",
+					"longUrl":  eventDetail.LongUrl,
+				},
+				EventDate:     metadata.EventDate,
+				EventName:     common.UrlCreated,
+				AggregateType: "",
+				AggregateId:   metadata.AggregateId,
+				UserId:        event.UserId,
 			})
 			if err != nil {
+				//TODO
 				return
+			} else {
+
+				eventDetailBytes, err := json.Marshal(eventDetail)
+				if err != nil {
+					return
+				}
+
+				err = pulsarPort.PublishEvent(common.EventModel{
+					AggregateId:   metadata.AggregateId,
+					AggregateType: event.AggregateType,
+					EventData:     eventDetailBytes,
+					EventDate:     metadata.EventDate,
+					EventName:     common.UrlCreated,
+					UserId:        event.UserId,
+				}, configs.Pulsar.Topic)
+				if err != nil {
+					//TODO
+					return
+				}
 			}
+
 		}
 
 		err = consumer.Ack(msg)

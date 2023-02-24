@@ -7,7 +7,6 @@ import (
 	"github.com/cemayan/url-shortener/config/api"
 	"github.com/cemayan/url-shortener/internal/api/write/adapter/mongodb"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/port/input"
-	mongo_output "github.com/cemayan/url-shortener/internal/api/write/domain/port/output"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/service"
 	"github.com/cemayan/url-shortener/managers/db"
 	"github.com/cemayan/url-shortener/managers/mq"
@@ -28,8 +27,8 @@ func SetupRoutes(app *fiber.App, configs *api.AppConfig, _log *log.Entry) {
 	var mongoManager db.MongodbManager
 	mongoManager = db.NewMongodbManager(configs.Mongo, _log)
 
-	var mongoPort mongo_output.MongoPort
-	mongoPort = mongodb.NewApiRepo(mongoManager.New(), configs, _log)
+	var mongoPort output.MongoPort
+	mongoPort = mongodb.NewApiRepo(mongoManager.New(), configs.Mongo, _log)
 
 	client, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL:               configs.Pulsar.Url,

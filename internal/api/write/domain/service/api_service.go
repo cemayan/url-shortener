@@ -8,8 +8,7 @@ import (
 	"github.com/cemayan/url-shortener/config/api"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/model"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/port/input"
-	mongo_output "github.com/cemayan/url-shortener/internal/api/write/domain/port/output"
-	"github.com/cemayan/url-shortener/internal/api/write/util"
+	"github.com/cemayan/url-shortener/util"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,7 +19,7 @@ type ApiSvc struct {
 	configs    *api.AppConfig
 	log        *log.Entry
 	pulsarPort output.PulsarPort
-	mongoPort  mongo_output.MongoPort
+	mongoPort  output.MongoPort
 }
 
 func (a ApiSvc) CreateUrl(c *fiber.Ctx) error {
@@ -36,7 +35,7 @@ func (a ApiSvc) CreateUrl(c *fiber.Ctx) error {
 
 	metadata := util.GetEventMetadata()
 	eventData := bson.M{
-		"LongUrl": userReq.Url,
+		"longUrl": userReq.LongUrl,
 	}
 
 	err := a.mongoPort.CreateEvent(model.Events{
@@ -74,7 +73,7 @@ func (a ApiSvc) CreateUrl(c *fiber.Ctx) error {
 	return c.JSON(`test`)
 }
 
-func NewApiService(mongoPort mongo_output.MongoPort, pulsarPort output.PulsarPort, configs *api.AppConfig, log *log.Entry) input.ApiUseCase {
+func NewApiService(mongoPort output.MongoPort, pulsarPort output.PulsarPort, configs *api.AppConfig, log *log.Entry) input.ApiUseCase {
 	return &ApiSvc{
 		configs:    configs,
 		log:        log,

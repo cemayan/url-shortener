@@ -1,4 +1,4 @@
-package util
+package helper
 
 import (
 	"github.com/cemayan/url-shortener/internal/event_handler/domain/model"
