@@ -1,7 +1,9 @@
 package output
 
-import "github.com/cemayan/url-shortener/internal/api/write/domain/model"
+import (
+	"github.com/cemayan/url-shortener/common/domain"
+)
 
 type MongoPort interface {
-	CreateEvent(event model.Events) error
+	CreateEvent(event domain.Events) error
 }

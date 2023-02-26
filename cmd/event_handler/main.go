@@ -1,24 +1,18 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/cemayan/url-shortener/common"
 	pulsar_handler "github.com/cemayan/url-shortener/common/adapters/pulsar"
 	"github.com/cemayan/url-shortener/common/ports/output"
 	"github.com/cemayan/url-shortener/config/event_handler"
-	"github.com/cemayan/url-shortener/internal/event_handler/adapter/cockroach"
 	"github.com/cemayan/url-shortener/internal/event_handler/adapter/database"
-	"github.com/cemayan/url-shortener/internal/event_handler/domain/model"
-	cockroack_output "github.com/cemayan/url-shortener/internal/event_handler/domain/port/output"
+	"github.com/cemayan/url-shortener/internal/event_handler/domain/service"
 	"github.com/cemayan/url-shortener/internal/event_handler/helper"
 	"github.com/cemayan/url-shortener/managers/db"
 	"github.com/cemayan/url-shortener/managers/hook"
 	"github.com/cemayan/url-shortener/managers/mq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"math/rand"
 	"os"
 	"time"
 )
@@ -78,47 +72,6 @@ func main() {
 	var pulsarPort output.PulsarPort
 	pulsarPort = pulsar_handler.NewPulsarHandler(pulsarManager, configs.Pulsar, _log.WithFields(logrus.Fields{"service": "event-handler"}))
 
-	channel := make(chan pulsar.ConsumerMessage, 10)
-
-	consumer := pulsarPort.ConsumeEvent(configs.Pulsar.Topic, fmt.Sprintf("%s-%v", "sub", rand.Int63()), channel)
-	defer consumer.Close()
-
-	for cm := range channel {
-		consumer := cm.Consumer
-		msg := cm.Message
-		var event common.EventModel
-
-		err := msg.GetSchemaValue(&event)
-		if err != nil {
-			_log.WithFields(logrus.Fields{"method": "GetSchemaValue", "message": err.Error(), "data": string(msg.Payload())}).Log(logrus.ErrorLevel)
-		}
-
-		if event.EventName == common.UrlCreated {
-
-			var cockroachPort cockroack_output.CockroachPort
-			cockroachPort = cockroach.NewUserUrlRepo(database.DB, _log.WithFields(logrus.Fields{"service": "cockroach-repo"}))
-
-			var eventDetail common.EventDataDetail
-
-			err := json.Unmarshal(event.EventData, &eventDetail)
-			if err != nil {
-				return
-			}
-
-			_, err = cockroachPort.CreateUserUrl(&model.UserUrl{
-				UserId:   event.UserId,
-				ShortUrl: eventDetail.ShortUrl,
-				LongUrl:  eventDetail.LongUrl,
-			})
-			if err != nil {
-				return
-			}
-		}
-
-		err = consumer.Ack(msg)
-		if err != nil {
-			_log.WithFields(logrus.Fields{"method": "ConsumerAck", "message": err.Error(), "data": fmt.Sprintf("%v||%v", msg.Topic(), msg.ID().EntryID())}).Log(logrus.ErrorLevel)
-		}
-
-	}
+	eventService := service.NewEventService(pulsarPort, configs, _log.WithFields(logrus.Fields{"service": "event-service"}))
+	eventService.Consume()
 }

@@ -37,9 +37,10 @@ var (
 )
 
 type EventDataDetail struct {
-	UserId   string `json:"userId,omitempty"`
-	LongUrl  string `json:"longUrl,omitempty"`
-	ShortUrl string `json:"shortUrl,omitempty"`
+	UserId    string `json:"userId,omitempty"`
+	LongUrl   string `json:"longUrl,omitempty"`
+	ShortUrl  string `json:"shortUrl,omitempty"`
+	UrlString string `json:"urlStr,omitempty"`
 }
 
 type EventModel struct {

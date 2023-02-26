@@ -2,10 +2,10 @@ package router
 
 import (
 	"github.com/apache/pulsar-client-go/pulsar"
+	"github.com/cemayan/url-shortener/common/adapters/mongodb"
 	pulsar_handler "github.com/cemayan/url-shortener/common/adapters/pulsar"
 	"github.com/cemayan/url-shortener/common/ports/output"
 	"github.com/cemayan/url-shortener/config/api"
-	"github.com/cemayan/url-shortener/internal/api/write/adapter/mongodb"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/port/input"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/service"
 	"github.com/cemayan/url-shortener/managers/db"

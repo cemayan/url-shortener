@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cemayan/url-shortener/common"
+	"github.com/cemayan/url-shortener/common/domain"
 	"github.com/cemayan/url-shortener/common/ports/output"
 	"github.com/cemayan/url-shortener/config/api"
 	"github.com/cemayan/url-shortener/internal/api/write/domain/model"
@@ -38,7 +39,7 @@ func (a ApiSvc) CreateUrl(c *fiber.Ctx) error {
 		"longUrl": userReq.LongUrl,
 	}
 
-	err := a.mongoPort.CreateEvent(model.Events{
+	err := a.mongoPort.CreateEvent(domain.Events{
 		ID:            primitive.NewObjectID(),
 		EventData:     eventData,
 		EventDate:     metadata.EventDate,
