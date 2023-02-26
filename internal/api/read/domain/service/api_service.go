@@ -8,6 +8,7 @@ import (
 	"github.com/cemayan/url-shortener/internal/api/read/domain/port/input"
 	"github.com/cemayan/url-shortener/internal/api/read/domain/port/output"
 	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,20 +19,26 @@ type ApiSvc struct {
 	cockroachPort output.CockroachPort
 }
 
-func (a ApiSvc) GetUserUrl(c *fiber.Ctx) error {
+func (a ApiSvc) Forward(c *fiber.Ctx) error {
 
-	url, err := a.cockroachPort.GetUserUrl("")
-	if err != nil {
-		return c.Status(400).JSON(common.Response{
-			StatusCode: 400,
-			Message:    fmt.Sprintf("Url not found or request is bad %v", err),
-		})
+	urlStr := c.Params("urlStr")
+
+	longUrl, err := a.redisPort.Get(urlStr)
+	if err == redis.Nil {
+		url, err := a.cockroachPort.GetUserUrl(urlStr)
+		if err != nil {
+			return c.Status(400).JSON(common.Response{
+				StatusCode: 400,
+				Message:    fmt.Sprintf("Url not found or request is bad %v", err),
+			})
+		}
+
+		return c.Redirect(url.LongUrl)
+	} else {
+
+		return c.Redirect(longUrl)
 	}
 
-	return c.Status(200).JSON(common.Response{
-		Data:       url,
-		StatusCode: 200,
-	})
 }
 
 func NewApiService(redisPort common_port.RedisPort, cockroachPort output.CockroachPort, configs *api.AppConfig, log *log.Entry) input.ApiUseCase {

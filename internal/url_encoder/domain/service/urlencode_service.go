@@ -71,6 +71,7 @@ func (u *UrlEncodeSvc) Consume() {
 			newUrlString := u.NewUrlString()
 
 			eventDetail.ShortUrl = urlPrefix + newUrlString
+			eventDetail.UrlString = newUrlString
 
 			err = u.mongoPort.CreateEvent(domain.Events{
 				ID: primitive.NewObjectID(),

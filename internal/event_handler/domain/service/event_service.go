@@ -62,7 +62,7 @@ func (u *EventSvc) Consume() {
 				return
 			}
 
-			err = u.redisPort.Set(eventDetail.ShortUrl, eventDetail.LongUrl)
+			err = u.redisPort.Set(eventDetail.UrlString, eventDetail.LongUrl)
 			if err != nil {
 				u.log.WithFields(logrus.Fields{"method": "RedisSet", "message": err.Error()}).Log(logrus.ErrorLevel)
 				return

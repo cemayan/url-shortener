@@ -13,9 +13,9 @@ type UserUrlrepo struct {
 	log *log.Entry
 }
 
-func (u UserUrlrepo) GetUserUrl(longUrl string) (model.UserUrl, error) {
+func (u UserUrlrepo) GetUserUrl(urlStr string) (model.UserUrl, error) {
 	var url model.UserUrl
-	tx := u.db.Where("long_url = ? ", longUrl).First(&url)
+	tx := u.db.Where("url_string = ? ", urlStr).First(&url)
 	return url, tx.Error
 }
 

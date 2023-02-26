@@ -6,6 +6,9 @@ cockroach:
 mongo:
   dbName: urlShortener
   uri: mongodb://localhost:27017
+redis:
+  address: localhost
+  addressPort: 6379
 pulsar:
   url: pulsar://localhost:6650
 secret: secret

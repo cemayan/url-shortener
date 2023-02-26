@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/apache/pulsar-client-go/pulsar"
 	pulsar_handler "github.com/cemayan/url-shortener/common/adapters/pulsar"
 	"github.com/cemayan/url-shortener/common/adapters/redis"
 	"github.com/cemayan/url-shortener/common/ports/output"
@@ -15,6 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
+	"time"
 )
 
 var _log *logrus.Logger
@@ -56,8 +58,19 @@ func init() {
 
 func main() {
 
+	pulsarClient, err := pulsar.NewClient(pulsar.ClientOptions{
+		URL:               configs.Pulsar.Url,
+		OperationTimeout:  30 * time.Second,
+		ConnectionTimeout: 30 * time.Second,
+	})
+
+	if err != nil {
+		_log.WithFields(logrus.Fields{"method": "NewPulsarClient", "message": err.Error()}).Log(logrus.FatalLevel)
+
+	}
+
 	var pulsarManager mq.PulsarManager
-	pulsarManager = mq.NewPulsarManager(pulsarManager.New(), configs.Pulsar, _log.WithFields(logrus.Fields{"service": "event-handler"}))
+	pulsarManager = mq.NewPulsarManager(pulsarClient, configs.Pulsar, _log.WithFields(logrus.Fields{"service": "event-handler"}))
 
 	var pulsarPort output.PulsarPort
 	pulsarPort = pulsar_handler.NewPulsarHandler(pulsarManager, configs.Pulsar, _log.WithFields(logrus.Fields{"service": "event-handler"}))

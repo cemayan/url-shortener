@@ -36,6 +36,7 @@ func SetupRoutes(app *fiber.App, configs *api.AppConfig, _log *log.Entry) {
 	var apiUseCase input.ApiUseCase
 	apiUseCase = service.NewApiService(redisPort, cockroachPort, configs, _log)
 
-	usGroup := v1Group.Group("/url")
-	usGroup.Get("/:id", apiUseCase.GetUserUrl)
+	usGroup := v1Group.Group("/forward")
+	usGroup.Get("/:urlStr", apiUseCase.Forward)
+
 }
