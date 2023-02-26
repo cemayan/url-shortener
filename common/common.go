@@ -16,6 +16,11 @@ type Cockroach struct {
 	Name     string `json:"name,omitempty"`
 }
 
+type Redis struct {
+	Address     string `json:"address,omitempty"`
+	AddressPort string `json:"addressPort,omitempty"`
+}
+
 type Mongo struct {
 	Uri    string `json:"uri,omitempty"`
 	DbName string `json:"dbName,omitempty"`

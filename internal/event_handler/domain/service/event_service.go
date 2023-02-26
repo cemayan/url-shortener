@@ -17,6 +17,7 @@ import (
 )
 
 type EventSvc struct {
+	redisPort  output.RedisPort
 	pulsarPort output.PulsarPort
 	configs    *event_handler.AppConfig
 	log        *log.Entry
@@ -57,8 +58,16 @@ func (u *EventSvc) Consume() {
 				UrlString: eventDetail.UrlString,
 			})
 			if err != nil {
+				u.log.WithFields(logrus.Fields{"method": "CockroachCreateUserUrl", "message": err.Error()}).Log(logrus.ErrorLevel)
 				return
 			}
+
+			err = u.redisPort.Set(eventDetail.ShortUrl, eventDetail.LongUrl)
+			if err != nil {
+				u.log.WithFields(logrus.Fields{"method": "RedisSet", "message": err.Error()}).Log(logrus.ErrorLevel)
+				return
+			}
+
 		}
 
 		err = consumer.Ack(msg)
@@ -68,8 +77,9 @@ func (u *EventSvc) Consume() {
 	}
 }
 
-func NewEventService(pulsarPort output.PulsarPort, configs *event_handler.AppConfig, log *log.Entry) *EventSvc {
+func NewEventService(redisPort output.RedisPort, pulsarPort output.PulsarPort, configs *event_handler.AppConfig, log *log.Entry) *EventSvc {
 	return &EventSvc{
+		redisPort:  redisPort,
 		pulsarPort: pulsarPort,
 		configs:    configs,
 		log:        log,

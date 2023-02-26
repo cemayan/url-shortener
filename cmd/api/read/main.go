@@ -3,7 +3,10 @@ package main
 import (
 	"github.com/cemayan/url-shortener/config/api"
 	"github.com/cemayan/url-shortener/internal/api/read/adapter/database"
+	"github.com/cemayan/url-shortener/internal/api/read/application/router"
 	"github.com/cemayan/url-shortener/managers/db"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
@@ -43,5 +46,15 @@ func init() {
 }
 
 func main() {
+	app := fiber.New()
+	app.Use(cors.New())
 
+	router.SetupRoutes(app, configs, _log.WithFields(logrus.Fields{"service": "read-api"}))
+
+	v.WatchConfig()
+
+	err := app.Listen(":8081")
+	if err != nil {
+		return
+	}
 }

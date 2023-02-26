@@ -23,6 +23,7 @@ type AppConfig struct {
 	Cockroach common.Cockroach `json:"cockroach" `
 	Kafka     common.Kafka     `json:"kafka"`
 	Pulsar    common.Pulsar    `json:"pulsar"`
+	Redis     common.Redis     `json:"redis"`
 }
 
 // Load config file from given path
