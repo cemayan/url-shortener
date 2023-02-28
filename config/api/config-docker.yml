@@ -1,0 +1,15 @@
+cockroach:
+  host: cockroachdb
+  name: us_metadata
+  port: 26257
+  user: root
+mongo:
+  dbName: urlShortener
+  uri: mongodb://mongodb:27017
+redis:
+  address: redis
+  addressPort: 6379
+pulsar:
+  url: pulsar://pulsar:6650
+secret: secret
+  

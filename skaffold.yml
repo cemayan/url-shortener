@@ -1,0 +1,28 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: api
+build:
+  artifacts:
+    - image: read-api
+      context: build/api/read
+      docker:
+        dockerfile: Dockerfile
+    - image: write-api
+      context: build/api/write
+      docker:
+        dockerfile: Dockerfile
+deploy:
+  name: Deploy
+  kubectl:
+    manifests:
+      - deployment/k8s/api/read/deployment.yaml
+      - deployment/k8s/api/write/deployment.yaml
+portForward:
+  - resourceType: service
+    resourceName: read-api
+    port: 8081
+  - resourceType: service
+    resourceName: write-api
+    port: 8082
+

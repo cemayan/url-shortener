@@ -1,7 +1,27 @@
 version: '3.5'
 
 services:
-  crdb:
+  pulsar:
+    image: apachepulsar/pulsar:2.6.0
+    ports:
+      - '8080:8080'
+      - '6650:6650'
+    environment:
+      PULSAR_MEM: " -Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g"
+    command: bin/pulsar standalone
+  mongo:
+    image: mongo:4.0
+    ports:
+      - "27020:27020"
+    command: mongod --port 27012
+    environment:
+      MONGO_INITDB_DATABASE: urlShortener
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo_data:/data/db
+  cockroachdb:
+    container_name: cockroachdb
     image: cockroachdb/cockroach:v22.2.5
     ports:
       - "26257:26257"
@@ -9,3 +29,59 @@ services:
     command: start-single-node --insecure
     volumes:
       - "${PWD}/cockroach-data/crdb:/cockroach/cockroach-data"
+  redis:
+    container_name: redis
+    image: redis:7.0.1-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - cache:/data
+  read-api:
+    build:
+      context: ../../
+      dockerfile: build/api/read/Dockerfile
+    container_name: read-api
+    ports:
+      - '8081:8081'
+    restart: always
+    environment:
+      - ENV=docker
+    depends_on:
+      - cockroachdb
+      - redis
+  write-api:
+    build:
+      context: ../../
+      dockerfile: build/api/write/Dockerfile
+    container_name: write-api
+    ports:
+      - '8082:8082'
+    restart: always
+    environment:
+      - ENV=docker
+    depends_on:
+      - redis
+      - cockroachdb
+  event_handler:
+    build:
+      context: ../../
+      dockerfile: build/event_handler/Dockerfile
+    container_name: event_handler
+    restart: always
+    environment:
+      - ENV=docker
+  url_encoder:
+    build:
+      context: ../../
+      dockerfile: build/url_encoder/Dockerfile
+    container_name: url_encoder
+    restart: always
+    environment:
+      - ENV=docker
+
+
+
+volumes:
+  redis:
+    driver: local

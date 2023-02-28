@@ -1,0 +1,13 @@
+cockroach:
+  host: cockroachdv
+  name: us_metadata
+  port: 26257
+  user: root
+mongo:
+  dbName: urlShortener
+  uri: mongodb://root:password@mongo:27012
+pulsar:
+  url: pulsar://pulsar:6650
+  topic: events
+secret: secret
+
